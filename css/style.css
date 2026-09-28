@@ -125,6 +125,7 @@ b { color: #1f2430; }
 .kp-hero h1 { margin: 0; font-size: 1.5rem; }
 .kp-hero p { margin: 4px 0 0; opacity: .92; font-size: .95rem; }
 .big-ol li { margin: 6px 0; }
+.term { font-weight: 800; color: var(--purple); background: var(--purple-soft); border-radius: 6px; padding: 1px 7px; white-space: nowrap; }
 .formula-card {
   background: var(--blue-soft); border: 1.5px dashed var(--blue); border-radius: 12px;
   padding: 12px 18px; margin: 10px 0; font-weight: 700; font-size: 1.05rem; text-align: center;
@@ -242,6 +243,8 @@ b { color: #1f2430; }
 .wbtn.trap.on { background: #fff; color: var(--red); border: 2px solid var(--red); }
 .wbtn.check { background: var(--green); }
 .wbtn.on { outline: 3px solid rgba(79,109,245,.35); }
+.wbtn.primary { background: var(--blue); }
+.werr { color: var(--red); font-weight: 700; padding: 10px 14px; background: var(--red-soft); border-radius: 10px; }
 
 /* ---------- 组件：小数点搬家 ---------- */
 .dsh-stage { display: flex; align-items: center; justify-content: center; gap: 14px; flex-wrap: wrap; margin: 14px 0; }
@@ -350,6 +353,7 @@ b { color: #1f2430; }
 .clk-slider { display: flex; align-items: center; gap: 8px; font-weight: 700; font-size: .9rem; justify-content: center; }
 .clk-slider input { accent-color: var(--orange); }
 .clk-right { flex: 1; min-width: 260px; }
+.clk-view { flex: 1; min-width: 260px; }
 .clk-toggle { display: flex; gap: 8px; margin-bottom: 10px; }
 .clk-card { background: var(--bg); border-radius: 12px; padding: 14px 18px; }
 .clk-q { font-weight: 700; color: var(--ink-2); }

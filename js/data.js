@@ -42,7 +42,7 @@ window.WILL_DATA = {
           <li><b>五查</b>：商 × 原来的除数 = 原来的被除数。</li>
         </ol>
         <p>这批 3 道竖式错题，分别踩了"移位数不同""商先写 0""验算用错数"三个坑。下面每道题都有<b>逐步动画</b>，跟着走一遍胜过抄十遍。</p>`,
-      vocab: ['long division', 'bring down', 'remainder', 'append a zero', 'check']
+      vocab: ['long division', 'bring down', 'remainder', 'append a zero', 'check / verify']
     },
     kp3: {
       name: '行程问题 · 速度大作战',
