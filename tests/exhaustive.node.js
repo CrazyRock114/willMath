@@ -283,6 +283,47 @@ for (const f of ['index.html', 'js/data.js', 'js/data2.js', 'js/data3.js', 'js/d
 }
 
 /* =========================================================
+ * T7 功能扩展域：原卷映射 / 打印模式（新功能加入即扩展枚举）
+ * ======================================================= */
+{
+  const appSrc = fs.readFileSync(path.join(ROOT, 'js/app.js'), 'utf8');
+  // 7a. 资产闭合：原卷映射引用的图片必须存在
+  const mapMatch = appSrc.match(/PROBLEM_SHEET_MAP = \{([\s\S]*?)\n  \};/);
+  ok(!!mapMatch, 'app.js 缺少 PROBLEM_SHEET_MAP');
+  if (mapMatch) {
+    const files = [...new Set([...mapMatch[1].matchAll(/file:\s*'([^']+)'/g)].map(m => m[1]))];
+    ok(files.length >= 3, `原卷图数量异常: ${files.length}`);
+    for (const f of files) ok(fs.existsSync(path.join(ROOT, f)), `原卷图不存在: ${f}`);
+    // 7b. 卷号交叉引用：映射条目的卷号必须与 p.source 的卷号一致
+    const entries = [...mapMatch[1].matchAll(/(p\d+):\s*\[([\s\S]*?)\]/g)];
+    ok(entries.length === EXPECTED_IDS.length, `映射覆盖题数 ${entries.length} ≠ 错题数 ${EXPECTED_IDS.length}`);
+    for (const [, pid, body] of entries) {
+      const p = DATA.problems.find(x => x.id === pid);
+      ok(!!p, `映射包含未知题目 ${pid}`);
+      if (!p) continue;
+      const srcSheet = (p.source.match(/卷[①②③④]/) || [])[0];
+      const descSheets = [...body.matchAll(/desc:\s*'[^']*?(卷[①②③④])/g)].map(m => m[1]);
+      ok(descSheets.length > 0, `${pid} 映射条目缺卷号描述`);
+      ok(descSheets[0] === srcSheet, `${pid} 卷号矛盾: source=${srcSheet} 但映射首条=${descSheets[0]}`);
+    }
+  }
+  // 7c. 打印页筛选计数闭合：按钮必须"由 DATA.kps 动态生成"或"逐一静态列出且计数吻合"
+  const filterBtns = [...appSrc.matchAll(/data-kp="([^"]*)"[^>]*>[^<]*\((\d+|\$\{[^}]+\})\s*题\)/g)];
+  const dynamicGen = /print-filter[\s\S]{0,400}Object\.entries\(DATA\.kps\)/.test(appSrc);
+  ok(dynamicGen || filterBtns.length === KP_IDS.length + 1,
+    `打印筛选按钮既非动态生成也无静态全列（静态匹配 ${filterBtns.length}/${KP_IDS.length + 1}）`);
+  for (const [, kp, n] of filterBtns) {
+    if (/^\d+$/.test(n)) {
+      const expect = kp ? DATA.problems.filter(p => p.kp === kp).length : DATA.problems.length;
+      ok(Number(n) === expect, `打印筛选 "${kp || '全量'} (${n} 题)" 与实际 ${expect} 题不符（硬编码计数）`);
+    }
+    if (kp && !kp.startsWith('${')) ok(!!DATA.kps[kp], `打印筛选 data-kp="${kp}" 不是有效科室`);
+  }
+  // 7d. 规格常量：原始需求为五年级学生（外部 spec 写入断言防回归）
+  ok(!/四年级/.test(appSrc), '打印卷出现 "四年级"，与原始需求（五年级）矛盾');
+}
+
+/* =========================================================
  * 报告
  * ======================================================= */
 const report = {

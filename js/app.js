@@ -108,7 +108,7 @@
     p5: [{ name: '卷① 小数除法竖式练习', file: 'assets/hw_image3_quotient_invariance_long_division.png', desc: '卷① C 部分第 1 题 原卷实拍' }],
     p6: [{ name: '卷① 小数除法竖式练习', file: 'assets/hw_image3_quotient_invariance_long_division.png', desc: '卷① C 部分第 2 题 原卷实拍' }],
     p7: [
-      { name: '卷① 小数除法竖式练习', file: 'assets/hw_image3_quotient_invariance_long_division.png', desc: '卷① C 部分第 3 题 首次出现实拍' },
+      { name: '卷② 除数是小数及应用题', file: 'assets/hw_image1_decimal_division_word_prob.png', desc: '卷② B 部分第 1 题 3.99÷9.5 首次出现实拍' },
       { name: '卷④ Cambridge Primary 6', file: 'assets/hw_image4_highlighted_cambridge.jpg', desc: '卷④ 讲义再次出现（荧光笔标黄难点）' }
     ],
     p8: [{ name: '卷② 除数是小数及应用题', file: 'assets/hw_image1_decimal_division_word_prob.png', desc: '卷② Mr. Phillips 跑步原卷实拍' }],
@@ -496,11 +496,9 @@
       </div>
       <div class="print-filter">
         <button class="print-filter-btn ${!filterKp ? 'on' : ''}" data-kp="">全量打印 (${DATA.problems.length} 题)</button>
-        <button class="print-filter-btn ${filterKp === 'kp2' ? 'on' : ''}" data-kp="kp2">✏️ 竖式长除法 (3 题)</button>
-        <button class="print-filter-btn ${filterKp === 'kp3' ? 'on' : ''}" data-kp="kp3">🚗 行程与单位 (2 题)</button>
-        <button class="print-filter-btn ${filterKp === 'kp4' ? 'on' : ''}" data-kp="kp4">🧩 混合运算与巧算 (2 题)</button>
-        <button class="print-filter-btn ${filterKp === 'kp5' ? 'on' : ''}" data-kp="kp5">🛒 单价比较决策 (1 题)</button>
-        <button class="print-filter-btn ${filterKp === 'kp1' ? 'on' : ''}" data-kp="kp1">🔢 搬家填空 (4 题)</button>
+        ${Object.entries(DATA.kps).map(([kpid, k]) => `
+          <button class="print-filter-btn ${filterKp === kpid ? 'on' : ''}" data-kp="${kpid}">${k.icon} ${k.name.split(' · ')[0]} (${DATA.problems.filter(p => p.kp === kpid).length} 题)</button>
+        `).join('')}
       </div>
       <p class="print-tip">💡 打印提示：请用 Chrome/Edge 浏览器，在打印预览中勾选「背景图形」，边距选「默认」或「自定义 10mm」。</p>
 
@@ -509,7 +507,7 @@
         <p class="print-tip">考点涵盖：小数除法长除法、商不变移位、行程单位换算、混合运算与单价决策</p>
         <table class="print-meta-table">
           <tr>
-            <td class="print-meta-cell">学生姓名：Will (四年级)</td>
+            <td class="print-meta-cell">学生姓名：Will (五年级)</td>
             <td class="print-meta-cell">训练日期：2026 年 ___ 月 ___ 日</td>
             <td class="print-meta-cell">卷面满分：100 分</td>
             <td class="print-meta-cell">实际得分：________</td>
