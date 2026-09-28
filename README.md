@@ -48,4 +48,4 @@
 
 ## 技术说明
 
-纯静态网站（HTML + CSS + 原生 JS），无框架、无构建、无外部依赖；核心竖式动画由 `js/division.js` 的通用长除法步骤生成器驱动，已用 node 机器复核：全部 13 组竖式数据（4 个页面演示 + 9 道练习动画）的商与验算、以及全站 350+ 条数值断言（讲解、易错点、估算、练习解析）均验证通过。
+纯静态网站（HTML + CSS + 原生 JS），无框架、无构建、无外部依赖；核心竖式动画由 `js/division.js` 的通用长除法步骤生成器驱动。质量保障：穷举测试套件 `node tests/exhaustive.node.js`（1339 条断言：schema/答案 oracle/竖式不变量/全站文案算式求值/一致性闭合），方法论见 **[TESTMETHOD.md](TESTMETHOD.md)**（可移植到任何数据驱动内容型项目），push/PR 由 GitHub Actions 自动执行。
