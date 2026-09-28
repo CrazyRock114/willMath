@@ -10,7 +10,7 @@
    * shiftDecimalStr('475', 2)  -> '47500'
    * shiftDecimalStr('0.9', 2)  -> '90'
    * shiftDecimalStr('3.658',1) -> '36.58'
-   * shiftDecimalStr('0.04',-2) -> '4'   （负数=左移）
+   * shiftDecimalStr('0.04',-2) -> '0.0004'（负数=左移）
    */
   function shiftDecimalStr(numStr, n) {
     let s = String(numStr).trim().replace(/\s+/g, '');
@@ -79,19 +79,17 @@
     let needInsertedDot = false;                     // 是否需要“插入”小数点列（被除数无小数点但商要变小数）
     const events = [];
     let rem = 0;
-    let crossedDecimal = origDecimalCol !== -1;      // 是否已越过被除数小数点（-1 表示还没有）
     let appended = 0;
     let idx = 0;                                     // 当前处理的列号（相对于 chars + 插入列）
     const MAX_APPEND = 8;
 
     // 先同步跑一遍算法收集事件（列号先按“无插入点”计，若最后发现需要插入点再整体右移）
     const raw = [];
-    const digitCols = [];                            // 每个数字事件对应的“字符索引”
     while (true) {
       let digit, isAppended = false, col = idx;
       if (idx < chars.length) {
         const ch = chars[idx];
-        if (ch === '.') { crossedDecimal = true; idx++; continue; }
+        if (ch === '.') { idx++; continue; }
         digit = parseInt(ch, 10);
       } else {
         if (rem === 0) break;
@@ -101,10 +99,6 @@
         digit = 0;
         col = chars.length + appended - 1;           // 补的0排在最后（未计插入点）
       }
-      const decimalBefore = isAppended && appended === 1 && origDecimalCol === -1
-        ? true
-        : (!crossedDecimal ? false : (isAppended && appended === 1 && origDecimalCol === -1));
-      // ↑ 真正的 decimalBefore 在下面统一算
       const value = rem * 10 + digit;
       const q = Math.floor(value / divisor);
       const product = q * divisor;
@@ -121,7 +115,7 @@
     // 插入点位于“最后一个原字符列”之后
     const dotCol = needInsertedDot ? chars.length : origDecimalCol;
     // 列总数
-    let totalCols = chars.length + (needInsertedDot ? 1 : 0) + (needInsertedDot ? appended : Math.max(0, appended));
+    const totalCols = chars.length + appended + (needInsertedDot ? 1 : 0);
     // 若被除数有小数点，补0直接排在最后，无需再插点
 
     // 给事件标 display（商数字是否写出来）与 decimalBefore
@@ -146,16 +140,8 @@
     // 修正：若被除数原本有小数点（如 39.9），商的小数点天然在 dotCol，不需要 decimalBefore 标记
     // 若被除数无小数点且发生过补0（如 1020），小数点插在补0前 → decimalBefore 已标在第一个补0事件上
 
-    // 商字符串
+    // 商字符串：按列直接判断（col 与 dotCol 比较）
     let intDigits = '', fracDigits = '';
-    evts.forEach(e => {
-      if (!e.display) return;
-      if (dotCol !== -1 && e.col > dotCol && (origDecimalCol !== -1 || e.appended)) fracDigits += String(e.q);
-      else if (dotCol !== -1 && e.col === dotCol && (origDecimalCol !== -1 || e.appended) && e.appended) fracDigits += String(e.q);
-      else intDigits += String(e.q);
-    });
-    // 更稳的方式：按列直接判断（col 与 dotCol 比较）
-    intDigits = ''; fracDigits = '';
     evts.forEach(e => {
       if (!e.display) return;
       if (dotCol !== -1 && e.col > dotCol) fracDigits += String(e.q);

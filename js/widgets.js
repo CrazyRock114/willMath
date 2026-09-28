@@ -14,7 +14,6 @@
     if (s.includes('.')) s = s.replace(/0+$/, '').replace(/\.$/, '');
     return s;
   }
-  function esc(s) { return String(s); }
 
   /* 数字 → 带小数点样式的 token（appendedAt: 高亮补的0个数, dotCreated: 小数点是"变"出来的） */
   function numTokens(str, opts) {
@@ -27,7 +26,8 @@
       if (ch === '.') {
         out.push('<span class="dn dot' + (opts.dotCreated && i === dotIdx ? ' created' : '') + '">·</span>');
       } else {
-        const isAppended = appended > 0 && i >= chars.length - appended && dotIdx !== -1 ? i > dotIdx : (appended > 0 && i >= chars.length - appended);
+        // appended>0 时移位结果必无小数点（原小数位不够移才会补0），直接按末尾 appended 个判断
+        const isAppended = appended > 0 && i >= chars.length - appended;
         out.push('<span class="dn' + (isAppended ? ' new0' : '') + '">' + ch + '</span>');
       }
     });
@@ -65,7 +65,6 @@
       const a = only ? a0 : LD.shiftDecimalStr(a0, n);
       const b = LD.shiftDecimalStr(b0, n);
       const apA = only ? 0 : appendedCount(a0, n), apB = appendedCount(b0, n);
-      const qNow = only ? exactQuotient(a0, b) : q0;
       const bad = only ? exactQuotient(a0, b) : null;
       el.innerHTML = `
         <div class="dsh">
@@ -199,7 +198,6 @@
         else mainToks.push({ col: ci, ch, cls: 'mdigit' });
         ci++;
       });
-      const firstApp = disp.findIndex(e => e.appended);
       if (r.rows.find(x => x.kind === 'main').tokens.some(t => t.cls && t.cls.includes('mdot-insert'))) {
         mainToks.push({ col: ci, ch: '.', cls: 'mdot insert' }); ci++;
       }
@@ -351,7 +349,7 @@
             <div class="clk-view">${view === 0
               ? `<div class="clk-card"><div class="clk-q">每 1 分钟 ⏱ 行多远 🚚？</div><div class="clk-a">${fmt(dist, 1)} km ÷ ${fmt(mins, 0)} min = <b>${fmt(perMin, 2)} km/min</b></div><div class="clk-sub">分子是路程，分母是时间</div></div>`
               : `<div class="clk-card"><div class="clk-q">每 1 千米 🚚 要多久 ⏱？</div><div class="clk-a">${fmt(mins, 0)} min ÷ ${fmt(dist, 1)} km = <b>${fmt(perKm, 2)} min/km</b></div><div class="clk-sub">分子是时间，分母是路程</div></div>`}</div>
-            <div class="clk-recip">🪄 两个答案互为<b>倒数</b>：${fmt(perMin, 2)} × ${fmt(perKm, 2)} = 1 —— 说的是同一件事！</div>
+            <div class="clk-recip">🪄 两个答案互为<b>倒数</b>：${fmt(perMin, 2)} × ${fmt(perKm, 2)} ${Math.abs(Number(fmt(perMin, 2)) * Number(fmt(perKm, 2)) - 1) < 1e-9 ? '=' : '≈'} 1 —— 说的是同一件事！</div>
           </div>` : ''}
         </div>`;
       el.querySelector('input[type=range]').addEventListener('input', e => { hours = Number(e.target.value); render(); });

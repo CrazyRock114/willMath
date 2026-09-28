@@ -396,7 +396,8 @@ b { color: #1f2430; }
 .gloss-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(220px, 1fr)); gap: 14px; }
 .gcard { perspective: 900px; height: 150px; cursor: pointer; outline: none; }
 .gcard-inner { position: relative; width: 100%; height: 100%; transition: transform .5s; transform-style: preserve-3d; }
-.gcard.flipped .gcard-inner, .gcard:focus .gcard-inner { transform: rotateY(180deg); }
+.gcard.flipped .gcard-inner { transform: rotateY(180deg); }
+.gcard:focus-visible { outline: 2px dashed var(--purple); outline-offset: 3px; }
 .gface {
   position: absolute; inset: 0; backface-visibility: hidden; border-radius: 14px;
   display: flex; flex-direction: column; justify-content: center; align-items: center;

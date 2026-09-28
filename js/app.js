@@ -29,7 +29,7 @@
   /* ---------- 工具 ---------- */
   function normAns(v) {
     v = String(v).trim()
-      .replace(/(km\/h|km\/min|min\/km|km\/L|km\/l|km|h|min|小时|千米|分钟|公里|升)/gi, '')
+      .replace(/(km\/h|km\/min|min\/km|km\/L|km\/l|km|h|min|小时|千米|分钟|公里|升|\$|￥|¥|元)/gi, '')
       .replace(/[，,\s　]/g, '');
     if (v === '') return '';
     if (/^-?\d*\.?\d+$/.test(v)) {
@@ -110,7 +110,7 @@
         <p class="muted">本批错题来自 ${DATA.sheets.length} 张练习卷：${DATA.sheets.map(s => `${s.name}（${s.problems} 题）`).join('、')}。标记出的 ${DATA.problems.length} 道已全部整理，配套 ${DATA.problems.length * 3} 道举一反三。</p>
       </section>
 
-      <h2 class="sec-title">🏥 治疗科室（4 个知识点）</h2>
+      <h2 class="sec-title">🏥 治疗科室（${Object.keys(DATA.kps).length} 个知识点）</h2>
       <div class="kp-grid">
         ${Object.entries(DATA.kps).map(([id, k]) => {
           const st = kpStats(id);
@@ -325,6 +325,11 @@
     if (el) el.textContent = `⭐ ${stars()}/${totalStars()}`;
   }
 
+  function updateFooterInfo() {
+    const el = document.getElementById('footerInfo');
+    if (el) el.textContent = `为 Will 定制 · ${DATA.problems.length} 道错题（${Object.keys(DATA.kps).length} 个知识点）· 配套 ${totalStars()} 道举一反三 · 进度自动保存在本机`;
+  }
+
   /* ---------- 词汇卡 ---------- */
   function renderGlossary() {
     setActiveNav('#/glossary');
@@ -341,6 +346,11 @@
             </div>
           </div>`).join('')}
       </div>`;
+    app.querySelectorAll('.gcard').forEach(c => {
+      const flip = () => c.classList.toggle('flipped');
+      c.addEventListener('click', flip);
+      c.addEventListener('keydown', e => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); flip(); } });
+    });
   }
 
   /* ---------- 全部练习 ---------- */
@@ -350,7 +360,7 @@
     app.innerHTML = `
       <a class="crumb" href="#/">← 返回医院大厅</a>
       <section class="kp-hero orange"><span class="kp-icon big">✊</span>
-        <div><h1>康复训练场</h1><p>33 道举一反三（11 道错题 × 3）· 已完成 ${stars()}/${total} ⭐</p></div></section>
+        <div><h1>康复训练场</h1><p>${total} 道举一反三（${DATA.problems.length} 道错题 × 3）· 已完成 ${stars()}/${total} ⭐</p></div></section>
       ${DATA.kps ? Object.entries(DATA.kps).map(([kpid, k]) => {
         const ps = DATA.problems.filter(p => p.kp === kpid);
         return `<section class="card">
@@ -370,5 +380,5 @@
 
   /* ---------- 启动 ---------- */
   window.addEventListener('hashchange', navigate);
-  document.addEventListener('DOMContentLoaded', () => { navigate(); updateNavStars(); });
+  document.addEventListener('DOMContentLoaded', () => { navigate(); updateNavStars(); updateFooterInfo(); });
 })();
