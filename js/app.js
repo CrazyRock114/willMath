@@ -45,13 +45,105 @@
   const OOPS = ['再想想哦，提示在里面 👀', '差一点点，检查一下小数点？', '别急，看看提示再试一次 💡'];
   const pick = a => a[Math.floor(Math.random() * a.length)];
 
+  /* ---------- 游戏化音效引擎 (Web Audio API) ---------- */
+  let audioCtx = null;
+  function getAudioCtx() {
+    if (!audioCtx && (window.AudioContext || window.webkitAudioContext)) {
+      const AudioCtx = window.AudioContext || window.webkitAudioContext;
+      audioCtx = new AudioCtx();
+    }
+    if (audioCtx && audioCtx.state === 'suspended') {
+      audioCtx.resume();
+    }
+    return audioCtx;
+  }
+  function isSoundEnabled() {
+    return localStorage.getItem('will-sound-enabled') !== 'false';
+  }
+  function setSoundEnabled(en) {
+    localStorage.setItem('will-sound-enabled', en ? 'true' : 'false');
+  }
+  function playTone(freq, type, duration, startTime, gainVal) {
+    try {
+      const ctx = getAudioCtx();
+      if (!ctx || !isSoundEnabled()) return;
+      const osc = ctx.createOscillator();
+      const gain = ctx.createGain();
+      osc.type = type || 'sine';
+      osc.frequency.setValueAtTime(freq, ctx.currentTime + (startTime || 0));
+      gain.gain.setValueAtTime(gainVal || 0.12, ctx.currentTime + (startTime || 0));
+      gain.gain.exponentialRampToValueAtTime(0.0001, ctx.currentTime + (startTime || 0) + duration);
+      osc.connect(gain);
+      gain.connect(ctx.destination);
+      osc.start(ctx.currentTime + (startTime || 0));
+      osc.stop(ctx.currentTime + (startTime || 0) + duration);
+    } catch (e) {}
+  }
+  function playCorrectSound() {
+    playTone(523.25, 'sine', 0.18, 0, 0.15);
+    playTone(659.25, 'sine', 0.18, 0.08, 0.15);
+    playTone(783.99, 'sine', 0.22, 0.16, 0.15);
+    playTone(1046.50, 'triangle', 0.35, 0.24, 0.18);
+  }
+  function playWrongSound() {
+    playTone(293.66, 'triangle', 0.15, 0, 0.15);
+    playTone(261.63, 'sine', 0.22, 0.10, 0.12);
+  }
+  function playStarSound() {
+    playTone(659.25, 'triangle', 0.12, 0, 0.14);
+    playTone(783.99, 'triangle', 0.12, 0.07, 0.14);
+    playTone(1046.50, 'sine', 0.15, 0.14, 0.16);
+    playTone(1318.51, 'sine', 0.35, 0.21, 0.18);
+  }
+  function playFlipSound() {
+    playTone(440, 'sine', 0.06, 0, 0.08);
+  }
+
+  /* ---------- 原始卷面实拍映射 ---------- */
+  const PROBLEM_SHEET_MAP = {
+    p1: [{ name: '卷① 小数除法竖式练习', file: 'assets/hw_image3_quotient_invariance_long_division.png', desc: '卷① B 部分第 1 题 原卷实拍' }],
+    p2: [{ name: '卷① 小数除法竖式练习', file: 'assets/hw_image3_quotient_invariance_long_division.png', desc: '卷① B 部分第 2 题 原卷实拍' }],
+    p3: [{ name: '卷① 小数除法竖式练习', file: 'assets/hw_image3_quotient_invariance_long_division.png', desc: '卷① B 部分第 3 题 原卷实拍' }],
+    p4: [{ name: '卷① 小数除法竖式练习', file: 'assets/hw_image3_quotient_invariance_long_division.png', desc: '卷① B 部分第 4 题 原卷实拍' }],
+    p5: [{ name: '卷① 小数除法竖式练习', file: 'assets/hw_image3_quotient_invariance_long_division.png', desc: '卷① C 部分第 1 题 原卷实拍' }],
+    p6: [{ name: '卷① 小数除法竖式练习', file: 'assets/hw_image3_quotient_invariance_long_division.png', desc: '卷① C 部分第 2 题 原卷实拍' }],
+    p7: [
+      { name: '卷① 小数除法竖式练习', file: 'assets/hw_image3_quotient_invariance_long_division.png', desc: '卷① C 部分第 3 题 首次出现实拍' },
+      { name: '卷④ Cambridge Primary 6', file: 'assets/hw_image4_highlighted_cambridge.jpg', desc: '卷④ 讲义再次出现（荧光笔标黄难点）' }
+    ],
+    p8: [{ name: '卷② 除数是小数及应用题', file: 'assets/hw_image1_decimal_division_word_prob.png', desc: '卷② Mr. Phillips 跑步原卷实拍' }],
+    p9: [{ name: '卷③ 小数混合运算', file: 'assets/hw_image2_mixed_operations_truck.png', desc: '卷③ 运算顺序题原卷实拍' }],
+    p10: [{ name: '卷③ 小数混合运算', file: 'assets/hw_image2_mixed_operations_truck.png', desc: '卷③ 乘法分配律隐藏×1 原卷实拍' }],
+    p11: [{ name: '卷③ 小数混合运算', file: 'assets/hw_image2_mixed_operations_truck.png', desc: '卷③ 卡车行驶与单位换算原卷实拍' }],
+    p12: [{ name: '卷④ Cambridge Primary 6', file: 'assets/hw_image4_highlighted_cambridge.jpg', desc: '卷④ Mandisa 橙子标黄题与 Will 的草稿笔迹' }]
+  };
+
+  function sheetToolsHtml(pid) {
+    const list = PROBLEM_SHEET_MAP[pid];
+    if (!list || !list.length) return '';
+    return `
+      <div class="ws-sheet-tools">
+        <button class="wbtn ghost view-sheet-btn">📸 查看 Will 原始卷面作业（含红黄批注）</button>
+      </div>
+      <div class="sheet-modal hidden">
+        ${list.map(s => `
+          <div class="sheet-preview-wrap">
+            <img class="sheet-preview-img" src="${s.file}" alt="${s.name}" loading="lazy">
+            <div class="sheet-caption">📄 ${s.desc}</div>
+          </div>
+        `).join('')}
+      </div>
+    `;
+  }
+
   /* ---------- 路由 ---------- */
   const routes = [
     { re: /^#?\/?$/, fn: renderHome },
     { re: /^#\/kp\/(\w+)$/, fn: renderKP },
     { re: /^#\/p\/(\w+)$/, fn: renderProblem },
     { re: /^#\/glossary$/, fn: renderGlossary },
-    { re: /^#\/practice$/, fn: renderPracticeAll }
+    { re: /^#\/practice$/, fn: renderPracticeAll },
+    { re: /^#\/print$/, fn: () => renderPrint() }
   ];
   function navigate() {
     const h = location.hash || '#/';
@@ -189,6 +281,7 @@
         <div class="ws-en">${p.problem.en}</div>
         <div class="ws-zh">${p.problem.zh}</div>
         <div class="ws-ans">✔ 卷面订正后的正确答案：<b>${p.correctAnswer}</b>——但我们要把坑彻底填平！</div>
+        ${sheetToolsHtml(p.id)}
       </section>
 
       ${p.reencounter ? `<section class="card reencounter"><h2>🔁 再遇同款 · 高发考点</h2><p>${p.reencounter}</p></section>` : ''}
@@ -245,6 +338,13 @@
       </div>`;
     window.initWidgets(app);
     bindPractice(app);
+    const sheetBtn = app.querySelector('.view-sheet-btn');
+    if (sheetBtn) {
+      sheetBtn.addEventListener('click', () => {
+        const modal = app.querySelector('.sheet-modal');
+        if (modal) modal.classList.toggle('hidden');
+      });
+    }
   }
 
   /* ---------- 练习卡片 ---------- */
@@ -307,8 +407,11 @@
           card.querySelector('.pcard-status').textContent = '已拿到 ⭐';
           card.querySelector('.pcard-num').textContent = card.querySelector('.pcard-num').textContent.replace(/✅/g, '').trim() + ' ✅';
           updateNavStars();
+          playCorrectSound();
+          if (problemCured(p)) playStarSound();
         } else {
           wrongTries++;
+          playWrongSound();
           const empty = inputs.some(v => normAns(v.value) === '');
           fb.innerHTML = `<span class="fb bad">${empty ? '把每个空都填上再检查哦～' : pick(OOPS)}</span>${wrongTries >= 2 ? ' <span class="muted">（可以点"看解析"了）</span>' : ''}`;
           card.classList.add('shake');
@@ -347,7 +450,10 @@
           </div>`).join('')}
       </div>`;
     app.querySelectorAll('.gcard').forEach(c => {
-      const flip = () => c.classList.toggle('flipped');
+      const flip = () => {
+        c.classList.toggle('flipped');
+        playFlipSound();
+      };
       c.addEventListener('click', flip);
       c.addEventListener('keydown', e => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); flip(); } });
     });
@@ -378,7 +484,107 @@
       <p class="muted center">点题号跳到对应错题页的练习区。</p>`;
   }
 
+  /* ---------- 打印 A4 练习卷 ---------- */
+  function renderPrint(filterKp) {
+    setActiveNav('#/print');
+    const ps = filterKp ? DATA.problems.filter(p => p.kp === filterKp) : DATA.problems;
+    app.innerHTML = `
+      <a class="crumb" href="#/">← 返回医院大厅</a>
+      <div class="print-actions">
+        <button class="wbtn primary do-print">🖨️ 立即打印本卷 (Print A4)</button>
+        <a class="wbtn ghost" href="#/">返回大厅</a>
+      </div>
+      <div class="print-filter">
+        <button class="print-filter-btn ${!filterKp ? 'on' : ''}" data-kp="">全量打印 (${DATA.problems.length} 题)</button>
+        <button class="print-filter-btn ${filterKp === 'kp2' ? 'on' : ''}" data-kp="kp2">✏️ 竖式长除法 (3 题)</button>
+        <button class="print-filter-btn ${filterKp === 'kp3' ? 'on' : ''}" data-kp="kp3">🚗 行程与单位 (2 题)</button>
+        <button class="print-filter-btn ${filterKp === 'kp4' ? 'on' : ''}" data-kp="kp4">🧩 混合运算与巧算 (2 题)</button>
+        <button class="print-filter-btn ${filterKp === 'kp5' ? 'on' : ''}" data-kp="kp5">🛒 单价比较决策 (1 题)</button>
+        <button class="print-filter-btn ${filterKp === 'kp1' ? 'on' : ''}" data-kp="kp1">🔢 搬家填空 (4 题)</button>
+      </div>
+      <p class="print-tip">💡 打印提示：请用 Chrome/Edge 浏览器，在打印预览中勾选「背景图形」，边距选「默认」或「自定义 10mm」。</p>
+
+      <section class="print-hero">
+        <h1>Will 的英语数学错题重练卷 · Grade 5</h1>
+        <p class="print-tip">考点涵盖：小数除法长除法、商不变移位、行程单位换算、混合运算与单价决策</p>
+        <table class="print-meta-table">
+          <tr>
+            <td class="print-meta-cell">学生姓名：Will (四年级)</td>
+            <td class="print-meta-cell">训练日期：2026 年 ___ 月 ___ 日</td>
+            <td class="print-meta-cell">卷面满分：100 分</td>
+            <td class="print-meta-cell">实际得分：________</td>
+          </tr>
+        </table>
+      </section>
+
+      <div class="print-grid">
+        ${ps.map((p, i) => `
+          <div class="print-card">
+            <div class="print-card-head">
+              <b>第 ${i + 1} 题：${p.title}</b>
+              <span class="print-tag">${DATA.kps[p.kp].name}</span>
+            </div>
+            <div class="print-q-en">${p.problem.en}</div>
+            <div class="print-q-zh">${p.problem.zh}</div>
+            
+            <div class="print-work-grid">
+              <div class="print-work-col">
+                <span class="print-box-title">【竖式书写与规范列式区】（请写清小数点移位弧线与商对齐）</span>
+                <div class="print-grid-canvas"></div>
+              </div>
+              <div class="print-work-col">
+                <span class="print-box-title">【验算与思维草稿区】（真验算：商×原除数）</span>
+                <div class="print-grid-canvas"></div>
+              </div>
+            </div>
+
+            <div class="print-answer-line">
+              <span>Final Answer (最终答案): ________________________________________</span>
+            </div>
+
+            <div class="print-checklist">
+              <span class="print-check-item">防错自查打卡：</span>
+              <span class="print-check-item">▢ 除数被除数移位数相同</span>
+              <span class="print-check-item">▢ 商小数点对齐新位置</span>
+              <span class="print-check-item">▢ 乘法笔算验算对上</span>
+              <span class="print-check-item">▢ 答句单位完整</span>
+            </div>
+          </div>
+        `).join('')}
+      </div>
+    `;
+
+    app.querySelector('.do-print').addEventListener('click', () => window.print());
+    app.querySelectorAll('.print-filter-btn').forEach(btn => {
+      btn.addEventListener('click', () => {
+        const kp = btn.dataset.kp;
+        renderPrint(kp || null);
+      });
+    });
+  }
+
+  function initSoundBtn() {
+    const btn = document.getElementById('soundToggle');
+    if (!btn) return;
+    const update = () => {
+      const en = isSoundEnabled();
+      btn.textContent = en ? '🔊' : '🔇';
+      btn.classList.toggle('muted', !en);
+    };
+    update();
+    btn.addEventListener('click', () => {
+      setSoundEnabled(!isSoundEnabled());
+      update();
+      if (isSoundEnabled()) playCorrectSound();
+    });
+  }
+
   /* ---------- 启动 ---------- */
   window.addEventListener('hashchange', navigate);
-  document.addEventListener('DOMContentLoaded', () => { navigate(); updateNavStars(); updateFooterInfo(); });
+  document.addEventListener('DOMContentLoaded', () => {
+    navigate();
+    updateNavStars();
+    updateFooterInfo();
+    initSoundBtn();
+  });
 })();
