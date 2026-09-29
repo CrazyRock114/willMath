@@ -7,7 +7,7 @@
 
   /* ---- 批次信息更新 ---- */
   D.batch = 'Batch 1 + 2 · 共 4 张卷';
-  D.sheets.push({ name: '卷④ Cambridge Primary 6 Ch19 · 典例精析（荧光笔题）', img: 'mmexport1790519087982.jpg', problems: 1 });
+  D.sheets.push({ name: '卷④ Cambridge Primary 6 Ch19 · 典例精析（荧光笔题）', img: 'assets/hw_image4_highlighted_cambridge.jpg', problems: 1 });
 
   /* ---- P7 再遇同款标记：3.99÷9.5 在卷④又出现了 ---- */
   const p7 = D.problems.find(p => p.id === 'p7');

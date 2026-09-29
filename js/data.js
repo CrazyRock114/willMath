@@ -5,9 +5,9 @@ window.WILL_DATA = {
   batch: '第一批 · Batch 1',
   date: '2026-09',
   sheets: [
-    { name: '卷① 小数除法竖式练习', img: 'mmexport1790267452718.png', problems: 6 },
-    { name: '卷② 除数是小数的小数除法及应用题', img: 'mmexport1790267455571.png', problems: 2 },
-    { name: '卷③ 小数混合运算及应用题（1）', img: 'mmexport1790267458793.png', problems: 3 }
+    { name: '卷① 小数除法竖式练习', img: 'assets/hw_image3_quotient_invariance_long_division.png', problems: 6 },
+    { name: '卷② 除数是小数的小数除法及应用题', img: 'assets/hw_image1_decimal_division_word_prob.png', problems: 2 },
+    { name: '卷③ 小数混合运算及应用题（1）', img: 'assets/hw_image2_mixed_operations_truck.png', problems: 3 }
   ],
   kps: {
     kp1: {

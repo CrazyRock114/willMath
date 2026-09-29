@@ -108,14 +108,14 @@
     p5: [{ name: '卷① 小数除法竖式练习', file: 'assets/hw_image3_quotient_invariance_long_division.png', desc: '卷① C 部分第 1 题 原卷实拍' }],
     p6: [{ name: '卷① 小数除法竖式练习', file: 'assets/hw_image3_quotient_invariance_long_division.png', desc: '卷① C 部分第 2 题 原卷实拍' }],
     p7: [
-      { name: '卷② 除数是小数及应用题', file: 'assets/hw_image1_decimal_division_word_prob.png', desc: '卷② B 部分第 1 题 3.99÷9.5 首次出现实拍' },
-      { name: '卷④ Cambridge Primary 6', file: 'assets/hw_image4_highlighted_cambridge.jpg', desc: '卷④ 讲义再次出现（荧光笔标黄难点）' }
+      { name: '卷② 除数是小数的小数除法及应用题', file: 'assets/hw_image1_decimal_division_word_prob.png', desc: '卷② B 部分第 1 题 3.99÷9.5 首次出现实拍' },
+      { name: '卷④ Cambridge Primary 6 Ch19 · 典例精析（荧光笔题）', file: 'assets/hw_image4_highlighted_cambridge.jpg', desc: '卷④ 讲义再次出现（荧光笔标黄难点）' }
     ],
-    p8: [{ name: '卷② 除数是小数及应用题', file: 'assets/hw_image1_decimal_division_word_prob.png', desc: '卷② Mr. Phillips 跑步原卷实拍' }],
-    p9: [{ name: '卷③ 小数混合运算', file: 'assets/hw_image2_mixed_operations_truck.png', desc: '卷③ 运算顺序题原卷实拍' }],
-    p10: [{ name: '卷③ 小数混合运算', file: 'assets/hw_image2_mixed_operations_truck.png', desc: '卷③ 乘法分配律隐藏×1 原卷实拍' }],
-    p11: [{ name: '卷③ 小数混合运算', file: 'assets/hw_image2_mixed_operations_truck.png', desc: '卷③ 卡车行驶与单位换算原卷实拍' }],
-    p12: [{ name: '卷④ Cambridge Primary 6', file: 'assets/hw_image4_highlighted_cambridge.jpg', desc: '卷④ Mandisa 橙子标黄题与 Will 的草稿笔迹' }]
+    p8: [{ name: '卷② 除数是小数的小数除法及应用题', file: 'assets/hw_image1_decimal_division_word_prob.png', desc: '卷② Mr. Phillips 跑步原卷实拍' }],
+    p9: [{ name: '卷③ 小数混合运算及应用题（1）', file: 'assets/hw_image2_mixed_operations_truck.png', desc: '卷③ 运算顺序题原卷实拍' }],
+    p10: [{ name: '卷③ 小数混合运算及应用题（1）', file: 'assets/hw_image2_mixed_operations_truck.png', desc: '卷③ 乘法分配律隐藏×1 原卷实拍' }],
+    p11: [{ name: '卷③ 小数混合运算及应用题（1）', file: 'assets/hw_image2_mixed_operations_truck.png', desc: '卷③ 卡车行驶与单位换算原卷实拍' }],
+    p12: [{ name: '卷④ Cambridge Primary 6 Ch19 · 典例精析（荧光笔题）', file: 'assets/hw_image4_highlighted_cambridge.jpg', desc: '卷④ Mandisa 橙子标黄题与 Will 的草稿笔迹' }]
   };
 
   function sheetToolsHtml(pid) {
@@ -152,7 +152,7 @@
       const m = h.match(r.re);
       if (m) { r.fn(m[1]); return; }
     }
-    renderHome();
+    renderNotFound('route', h);
   }
 
   /* ---------- 通用渲染 ---------- */
@@ -169,6 +169,20 @@
       <span class="pchip-body"><b>${p.title}</b><small>${p.problem.en}</small></span>
       <span class="pchip-status">${cured ? '✅ 已治愈' : `${doneN}/${p.practice.length} ⭐`}</span>
     </a>`;
+  }
+
+  /* ---------- 404 页面 ---------- */
+  function renderNotFound(type, id) {
+    setActiveNav('');
+    app.innerHTML = `
+      <a class="crumb" href="#/">← 返回医院大厅</a>
+      <section class="card center notfound-card">
+        <div class="notfound-icon">🩺</div>
+        <h2>404 · 查无此${type === 'kp' ? '科室' : type === 'problem' ? '病历' : '页面'}</h2>
+        <p class="muted">没有找到与 <code>${id || '未知路径'}</code> 对应的${type === 'kp' ? '知识科室' : type === 'problem' ? '错题病历' : '内容'}，可能已经被治愈或链接有误。</p>
+        <a class="bigbtn" href="#/">返回医院大厅</a>
+      </section>
+    `;
   }
 
   /* ---------- 首页 ---------- */
@@ -227,7 +241,7 @@
   /* ---------- 科室页 ---------- */
   function renderKP(id) {
     const k = kpOf(id);
-    if (!k) { renderHome(); return; }
+    if (!k) { renderNotFound('kp', id); return; }
     setActiveNav('#/kp/' + id);
     const ps = DATA.problems.filter(p => p.kp === id);
     app.innerHTML = `
@@ -254,7 +268,7 @@
   /* ---------- 错题详情页 ---------- */
   function renderProblem(id) {
     const p = DATA.problems.find(x => x.id === id);
-    if (!p) { renderHome(); return; }
+    if (!p) { renderNotFound('problem', id); return; }
     setActiveNav('#/p/' + id);
     const k = kpOf(p.kp);
     const idx = DATA.problems.indexOf(p);

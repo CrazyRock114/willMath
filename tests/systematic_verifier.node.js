@@ -192,6 +192,26 @@ runPhase('P1', 'L0 安全、语法与资产可达性', assert => {
   // 4. CSS 与 HTML 物理存在性
   assert(fs.existsSync(path.join(ROOT, 'index.html')), 'index.html 必须存在');
   assert(fs.existsSync(path.join(ROOT, 'css/style.css')), 'css/style.css 必须存在');
+
+  // 5. SEO 与爬虫卫生规范
+  const robotsPath = path.join(ROOT, 'robots.txt');
+  assert(fs.existsSync(robotsPath), 'robots.txt 必须存在');
+  if (fs.existsSync(robotsPath)) {
+    const robotsTxt = fs.readFileSync(robotsPath, 'utf8');
+    assert(robotsTxt.includes('User-agent: *'), 'robots.txt 必须允许通用爬虫');
+    assert(robotsTxt.includes('Sitemap: https://will.math3.cn/sitemap.xml'), 'robots.txt 必须声明 sitemap.xml');
+  }
+
+  const sitemapPath = path.join(ROOT, 'sitemap.xml');
+  assert(fs.existsSync(sitemapPath), 'sitemap.xml 必须存在');
+  if (fs.existsSync(sitemapPath)) {
+    const sitemapXml = fs.readFileSync(sitemapPath, 'utf8');
+    assert(sitemapXml.includes('https://will.math3.cn/'), 'sitemap.xml 必须包含站点主页 URL');
+    assert(sitemapXml.includes('https://will.math3.cn/#/p/p12'), 'sitemap.xml 必须覆盖新题目 p12');
+  }
+
+  const htmlSrc = fs.readFileSync(path.join(ROOT, 'index.html'), 'utf8');
+  assert(/<meta\s+name=["']description["']\s+content=["'][^"']+["']/i.test(htmlSrc), 'index.html 必须包含 SEO meta description');
 });
 
 /* =========================================================
@@ -252,6 +272,19 @@ runPhase('P2', 'L1 结构拓扑与双向幽灵字段普查', assert => {
       }
     });
   }
+
+  // DATA.sheets 完整性与图片双向普查
+  assert(Array.isArray(DATA.sheets) && DATA.sheets.length === 4, 'DATA.sheets 必须严格包含 4 张卷子');
+  let sheetProbSum = 0;
+  for (const s of DATA.sheets) {
+    assert(typeof s.name === 'string' && s.name.length > 0, '卷名必须非空');
+    assert(typeof s.problems === 'number' && s.problems > 0, '卷题数必须大于 0');
+    sheetProbSum += s.problems;
+    assert(typeof s.img === 'string' && s.img.length > 0, `卷 ${s.name} 必须配置原卷图片字段`);
+    const p = path.join(ROOT, s.img);
+    assert(fs.existsSync(p), `卷 ${s.name} 引用的图片物理存在: ${s.img}`);
+  }
+  assert(sheetProbSum === 12, `4 张卷题目总和必须严格等于 12 道错题，实为 ${sheetProbSum}`);
 
   // 路由与锚点闭合
   const html = fs.readFileSync(path.join(ROOT, 'index.html'), 'utf8');
@@ -506,6 +539,13 @@ runPhase('P7', 'L6 真实状态机走查与逆向路径断言', assert => {
   const toggleSound = () => { soundState = !soundState; return soundState; };
   assert(toggleSound() === false, '音效切换关');
   assert(toggleSound() === true, '音效切换开');
+
+  // 4. 路由兜底与 404 容错状态机
+  const appSrc = fs.readFileSync(path.join(ROOT, 'js/app.js'), 'utf8');
+  assert(appSrc.includes('renderNotFound'), 'app.js 必须具备独立的 404 兜底渲染函数 renderNotFound');
+  assert(appSrc.includes('#404') || appSrc.includes('renderNotFound('), 'app.js 路由调度必须接管非法路由与未知错题 ID');
+  const cssSrc = fs.readFileSync(path.join(ROOT, 'css/style.css'), 'utf8');
+  assert(cssSrc.includes('.notfound-card'), 'css/style.css 必须包含 .notfound-card 样式');
 });
 
 /* =========================================================
@@ -532,6 +572,14 @@ runPhase('P8', 'L7/L8 指纹状态机签核与自洽审计', assert => {
   assert(readme.includes('36 道'), 'README 必须与举一反三题数 36 吻合');
   assert(readme.includes('5 个知识"治疗科室"'), 'README 必须与科室数 5 吻合');
   assert(readme.includes('🖨️ 打印卷'), 'README 必须包含 A4 打印卷页面声明');
+
+  // 3. README 声称断言数强校验
+  const readmeAssertMatch = readme.match(/（(\d+)\s*条断言/);
+  assert(!!readmeAssertMatch, 'README 必须包含穷举测试断言数声明');
+  if (readmeAssertMatch) {
+    const claimed = parseInt(readmeAssertMatch[1], 10);
+    assert(claimed === 1444, `README 声明断言数 (${claimed}) 必须严格对账至 1444`);
+  }
 });
 
 /* =========================================================

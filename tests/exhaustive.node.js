@@ -324,6 +324,49 @@ for (const f of ['index.html', 'js/data.js', 'js/data2.js', 'js/data3.js', 'js/d
 }
 
 /* =========================================================
+ * T8 生态存活、反向幽灵普查与宣称自洽疫苗 (L5 / L8 闭环)
+ * ======================================================= */
+{
+  // 8a. 反向幽灵普查：DATA.sheets[].img 必须全部真实存在且非空
+  for (const s of DATA.sheets) {
+    ok(!!s.img, `试卷缺少 img 字段: ${s.name}`);
+    ok(fs.existsSync(path.join(ROOT, s.img)), `试卷图片不存在: ${s.img}`);
+  }
+
+  // 8b. SEO 基础设施三件套
+  ok(fs.existsSync(path.join(ROOT, 'robots.txt')), '缺少 robots.txt');
+  const robots = fs.readFileSync(path.join(ROOT, 'robots.txt'), 'utf8');
+  ok(robots.includes('Allow: /'), 'robots.txt 必须允许爬取');
+  ok(fs.existsSync(path.join(ROOT, 'sitemap.xml')), '缺少 sitemap.xml');
+  const sitemap = fs.readFileSync(path.join(ROOT, 'sitemap.xml'), 'utf8');
+  ok(sitemap.includes('https://will.math3.cn/'), 'sitemap.xml 必须收录主页');
+  for (const p of DATA.problems) {
+    ok(sitemap.includes(`#/p/${p.id}`), `sitemap.xml 缺少题目 ${p.id}`);
+  }
+  const htmlSrc = fs.readFileSync(path.join(ROOT, 'index.html'), 'utf8');
+  ok(htmlSrc.includes('<meta name="description"'), 'index.html 缺少 meta description');
+
+  // 8c. 逆向路由 404 保护
+  const appCode = fs.readFileSync(path.join(ROOT, 'js/app.js'), 'utf8');
+  ok(appCode.includes('renderNotFound'), 'app.js 必须实现 renderNotFound');
+  ok(!appCode.includes('if (!k) { renderHome();'), 'renderKP 不得静默回退 renderHome');
+  ok(!appCode.includes('if (!p) { renderHome();'), 'renderProblem 不得静默回退 renderHome');
+
+  // 8d. README 演示组件清单完整性 (8 个组件全收录)
+  const readmeSrc = fs.readFileSync(path.join(ROOT, 'README.md'), 'utf8');
+  ok(readmeSrc.includes('compare-line') || readmeSrc.includes('除数与商的大小数线'), 'README 必须收录全部 8 个组件（含 compare-line）');
+
+  // 8e. L8 营销语封顶 / README 声明对账 (律五：数字不经人手)
+  const readmeAssertMatch = readmeSrc.match(/（(\d+)\s*条断言/);
+  ok(!!readmeAssertMatch, 'README 必须包含格式为"（N 条断言"的测试声明');
+  if (readmeAssertMatch) {
+    const claimed = parseInt(readmeAssertMatch[1], 10);
+    // 注意：当前检查是倒数第 1 个断言，pass+1 即为最终总通过数
+    ok(claimed === pass + 1, `README 声称断言数 (${claimed}) 与实际测试输出 (${pass + 1}) 必须完全一致`);
+  }
+}
+
+/* =========================================================
  * 报告
  * ======================================================= */
 const report = {

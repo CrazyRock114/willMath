@@ -32,6 +32,7 @@
 4. **易错点病历分析**（典型错解 → 为什么大脑会这样想 → 防错方法）
 5. **互动实验室**（可视化演示）：
    - 小数点联动搬家（拖动看"商不变"，还能演示"只移除数"的坏事）
+   - 除数与商的大小数线（滑动除数观察商变大、变小与不变）
    - 长除法逐步动画（含验算演示，0 一步一步亮出来）
    - 速度实验室（拖动路程/时间，看_runner_跑起来）
    - 时钟换算 + 倒数视角（0.6h=36min；km/min 与 min/km 互为倒数）
@@ -51,4 +52,4 @@
 
 ## 技术说明
 
-纯静态网站（HTML + CSS + 原生 JS），无框架、无构建、无外部依赖；核心竖式动画由 `js/division.js` 的通用长除法步骤生成器驱动。质量保障：穷举测试套件 `node tests/exhaustive.node.js`（1366 条断言：schema/答案 oracle/竖式不变量/全站文案算式求值/一致性闭合），方法论见 **[TESTMETHOD.md](TESTMETHOD.md)**（可移植到任何数据驱动内容型项目），push/PR 由 GitHub Actions 自动执行。
+纯静态网站（HTML + CSS + 原生 JS），无框架、无构建、无外部依赖；核心竖式动画由 `js/division.js` 的通用长除法步骤生成器驱动。质量保障：穷举测试套件 `node tests/exhaustive.node.js`（1444 条断言：schema/答案 oracle/竖式不变量/全站文案算式求值/一致性闭合/SEO与路由兜底），方法论见 **[TESTMETHOD.md](TESTMETHOD.md)**（可移植到任何数据驱动内容型项目），push/PR 由 GitHub Actions 自动执行。
