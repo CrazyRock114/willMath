@@ -16,3 +16,5 @@ jobs:
         run: for f in js/*.js tests/*.js; do node --check "$f"; done
       - name: 穷举测试（数据/答案/文案算式/一致性）
         run: node tests/exhaustive.node.js
+      - name: Systematic Verifier (L0~L8 全态穷举验证)
+        run: node tests/systematic_verifier.node.js
